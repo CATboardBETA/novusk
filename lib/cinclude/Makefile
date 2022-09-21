@@ -29,6 +29,9 @@ mv_files:
 	mv lib/libstdint_intn.a lib/libstdint-intn.a
 	mv lib/libstdint_uintn.a lib/libstdint-uintn.a
 
+test_libc:
+	$(MAKE) -C test/
+
 clean:
 	@ cargo clean
 	@ rm -rf inc/* lib/* test/build/*

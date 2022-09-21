@@ -1,6 +1,7 @@
 .idea/
 **/.idea
 target/
+build.log
 
 Cargo.lock
 

@@ -92,7 +92,11 @@ members = [
     "kernel/modules/fscheck/",
     # Tools
     "tools/bootloader_image/",
+
+    # Shell
+    "shell/",
 ]
+
 
 [dependencies]
 fb = { path = "drivers/fb/" }

@@ -52,7 +52,10 @@ novusk:
 	$(NOVUSK_BUILD)
 
 libc:
-	@ $(MAKE) -C lib/cinclude TARGET=$(TARGET_ARCH) HOST=$(HOST_TARGET)
+	@ $(MAKE) -C lib/cinclude/ TARGET=$(TARGET_ARCH) HOST=$(HOST_TARGET)
+
+test_libc: 
+	@ $(MAKE) -C lib/cinclude/ test_libc
 
 clean:
 	@ cargo clean
