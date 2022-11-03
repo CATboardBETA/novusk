@@ -1,6 +1,15 @@
 HOST =?
 TARGET =?
-BUILD_ARGS = --release --target ../../targets/$(TARGET).json # FIXME: Use novusk targets
+
+ifeq ($(HOST),?)
+$(error HOST is not set)
+else ifeq ($(TARGET),?)
+$(error TARGET is not set)
+else ifeq ($(HOST),$(TARGET))
+BUILD_ARGS = --release --target $(HOST)
+else
+BUILD_ARGS = --release --target ../../targets/$(TARGET).json
+endif
 
 default: clean libs headers mv_files
 	@ # mv target/aarch64-apple-darwin/release/*.a lib/ # FIXME same as above

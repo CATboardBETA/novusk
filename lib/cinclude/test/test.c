@@ -1,7 +1,7 @@
 
 // Disambiguation between system and our own definitions of the standard library require us to go back a few
 // directories.
-#include "../inc/stdlib.h"
+#include <stdlib.h>
 
 int main() {
     if (!rust_ffi_test()) return 1;
