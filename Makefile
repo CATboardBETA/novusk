@@ -60,3 +60,8 @@ test_libc:
 clean:
 	@ cargo clean
 	@ $(MAKE) -C lib/cinclude/ clean
+	@ rm -rf arch/aarch64/src/dif.rs
+	@ rm -rf arch/arm/src/dif.rs
+	@ rm -rf arch/riscv/src/dif.rs
+	@ rm -rf arch/x86_64/src/dif.rs
+	@ rm -rf arch/xtensa/src/dif.rs

@@ -7,4 +7,6 @@ license = "MIT"
 publish = false
 
 [dependencies]
+console = { path = "console/" }
+dif = "0.1.1"
 novuskinc = { git = "https://github.com/new-kernel/novuskinc/" }

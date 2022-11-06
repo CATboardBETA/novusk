@@ -1,8 +1,9 @@
 pub mod init;
+pub mod kernel;
 pub mod panic;
 pub mod power;
 pub mod printk;
-pub mod uart;
+pub mod setup;
 
-#[path = "../../../../kernel/device.rs"]
-pub mod device;
+#[path = "../../../../drivers/drivers.rs"]
+pub(crate) mod drivers;

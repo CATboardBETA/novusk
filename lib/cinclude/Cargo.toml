@@ -6,6 +6,7 @@ edition = "2021"
 [[bin]]
 name = "cinclude-bin"
 path = "src/main.rs"
+# Have the default target be the host target.
 
 [workspace]
 members = ["genheaders", "stdint", "stdlib", "bits/stdint_intn", "bits/stdint_uintn", "string", "stddef", "_include"]

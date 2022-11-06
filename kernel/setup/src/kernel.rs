@@ -1,7 +1,10 @@
+use dif::DifFieldNames;
+// use novuskinc::console::{console_init, printk_init};
 use novuskinc::irq::{irqchip_setup};
 use novuskinc::platform::*;
-use printk::init::console_init;
+use printk::init::error::*;
 use crate::SetupReturn;
+use crate::libdif::DIF;
 
 pub trait ArchKernelSetup {
     fn irq_setup(&self) -> SetupReturn {
@@ -10,18 +13,14 @@ pub trait ArchKernelSetup {
     }
 
     fn device_init(&self) -> SetupReturn {
-        let mut early_device= 0;
         let mut device = 0;
 
         unsafe {
-            early_device = early_device_init();
             device = device_init();
         }
 
-        if early_device != 0 {
-            return (Err("Device init error"), DEVICE_INIT_ERRORS[early_device as usize]);
-        } else if device != 0 {
-            return (Err("Device init error"), DEVICE_INIT_ERRORS[device as usize]);
+        if device != 0 {
+            return (Err(DEVICE_INIT_ERRORS[device as usize]), "Device init error");
         }
 
         return (Ok(()), "Device initialized successfully");
@@ -40,7 +39,32 @@ pub trait ArchKernelSetup {
     }
 
     unsafe fn early_kernel_setup(&self) -> SetupReturn {
-        console_init();
+        extern "C" {
+            pub fn console_init() -> u8;
+            pub fn printk_init() -> u8;
+        }
+
+        match console_init() {
+            SUCCESS => {},
+            DRIVER_FAILED => {
+                return (Err("Console init error"), "Failed to initialize console driver");
+            },
+            DRIVER_NOT_FOUND => {
+                return (Err("Console init error"), "Console driver not found");
+            },
+            _ => {}
+        }
+
+        match printk::printk_init(DIF.get(DifFieldNames::PrintingMethod)) {
+            SUCCESS => {}
+            DRIVER_FAILED => {
+                return (Err("Printk init error"), "");
+            },
+            DRIVER_NOT_FOUND => {
+                return (Err("Printk init error"), "Console driver not found");
+            },
+            _ => {}
+        }
 
         (Ok(()), "Successfully setup early main kernel")
     }

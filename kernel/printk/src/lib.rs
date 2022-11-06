@@ -1,12 +1,15 @@
 #![no_std]
 
+pub extern crate console;
 #[macro_use] extern crate novuskinc;
 
 use core::borrow::Borrow;
 use core::fmt::{Arguments, Write};
 use novuskinc::drivers::Driver;
 use novuskinc::drivers::manager::DeviceDriverManager;
+use crate::init::error::SUCCESS;
 
+pub mod early;
 pub mod init;
 pub mod macros;
 
@@ -33,7 +36,6 @@ impl Printk {
     pub fn reset(&mut self) {
         let writer = self.console_driver;
 
-
         writer.unwrap().clear_screen(0);
     }
 }
@@ -58,10 +60,9 @@ pub(crate) unsafe  fn can_printk_work() -> bool {
     return true;
 }
 
-pub unsafe fn printk_init(writer_driver: &'static str) {
-    if DEVICE_DRIVERS.get_driver(writer_driver).is_some() {
-        // PRINTK.writer = writer_driver;
-    } else {
-        panic!("{} is not a driver option to support printk, use \"Console Driver\" or \"Graphics Driver\"", writer_driver);
-    }
+pub unsafe fn printk_init(writer_driver: &'static str) -> u8 {
+    PRINTK.console_driver = DEVICE_DRIVERS.get_driver(writer_driver);
+    PRINTK.init = true;
+
+    SUCCESS
 }

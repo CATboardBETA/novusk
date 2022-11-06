@@ -3,19 +3,29 @@
 #![allow(non_camel_case_types)]
 #![allow(non_upper_case_globals)]
 #![allow(unused)]
+#![warn(clippy::pedantic)]
+#![warn(clippy::nursery)]
+#![warn(clippy::cargo)]
+#![allow(clippy::missing_const_for_fn)]
 
+extern crate alloc;
+
+use alloc::borrow::ToOwned;
+use alloc::ffi::CString;
+use alloc::string::ToString;
 use core::borrow::Borrow;
+use core::ffi::CStr;
 use core::ptr;
 use libc::{
     c_char, c_double, c_float, c_int, c_long, c_longlong, c_uchar, c_uint, c_ulong, c_ulonglong,
-    c_void, size_t,
+    c_void, size_t, CS5,
 };
 
 #[cfg(not(feature = "no_lang_items"))]
 #[path = "../../lang.rs"]
 pub(crate) mod lang;
 
-/// cbindgen:derive-eq=
+/// cbindgen:derive-eq
 /// cbindgen:derive-neq
 #[no_mangle]
 #[repr(C)]
@@ -24,7 +34,7 @@ pub struct div_t {
     rem: c_int,
 }
 
-/// cbindgen:derive-eq=
+/// cbindgen:derive-eq
 /// cbindgen:derive-neq
 #[no_mangle]
 #[repr(C)]
@@ -33,7 +43,7 @@ pub struct ldiv_t {
     rem: c_long,
 }
 
-/// cbindgen:derive-eq=
+/// cbindgen:derive-eq
 /// cbindgen:derive-neq
 #[no_mangle]
 #[repr(C)]
@@ -42,7 +52,7 @@ pub struct lldiv_t {
     rem: c_longlong,
 }
 
-pub const RAND_MAX: c_int = 2147483647;
+pub const RAND_MAX: c_int = 2_147_483_647;
 
 pub const EXIT_FAILURE: c_int = 1;
 pub const EXIT_SUCCESS: c_int = 0;
@@ -58,20 +68,20 @@ pub extern "C" fn atof(s: *const c_char) -> c_double {
 
 /// Convert a string to an integer.
 #[no_mangle]
-pub extern "C" fn atoi(s: *const c_char) -> c_int {
-    unimplemented!()
+pub unsafe extern "C" fn atoi(s: *const c_char) -> c_int {
+    unsafe { CStr::from_ptr(s).to_str().unwrap().parse().unwrap() }
 }
 
 /// Convert a string to a long integer.
 #[no_mangle]
-pub extern "C" fn atol(s: *const c_char) -> c_long {
-    unimplemented!()
+pub unsafe extern "C" fn atol(s: *const c_char) -> c_long {
+    unsafe { CStr::from_ptr(s).to_str().unwrap().parse().unwrap() }
 }
 
 /// Convert a string to a long long integer.
 #[no_mangle]
-pub extern "C" fn atoll(s: *const c_char) -> c_longlong {
-    unimplemented!()
+pub unsafe extern "C" fn atoll(s: *const c_char) -> c_longlong {
+    unsafe { CStr::from_ptr(s).to_str().unwrap().parse().unwrap() }
 }
 
 /// Convert a string to a floating-point number.
@@ -96,8 +106,48 @@ pub extern "C" fn strtold(s: *const c_char, endp: *mut *mut c_char)
 
 /// Convert a string to a long integer.
 #[no_mangle]
+#[allow(clippy::missing_panics_doc)]
 pub extern "C" fn strtol(s: *const c_char, endp: *mut *mut c_char, base: c_int) -> c_long {
-    unimplemented!()
+    let s = unsafe { CStr::from_ptr(s).to_str().unwrap().to_owned() };
+    let base = if base == 0 { 10 } else { base };
+    let mut chars = s.chars().peekable();
+    let mut result: c_long = 0;
+    let mut sign: i8 = 1;
+
+    if let Some(' ') = chars.peek() {
+        chars.next();
+    }
+
+    if let Some('\t') = chars.peek() {
+        chars.next();
+    }
+
+    if let Some('\n') = chars.peek() {
+        chars.next();
+    }
+
+    if let Some('\r') = chars.peek() {
+        chars.next();
+    }
+
+    if let Some('+') = chars.peek() {
+        chars.next();
+    }
+
+    if let Some('-') = chars.peek() {
+        sign = -1;
+        chars.next();
+    }
+
+    for c in chars {
+        if let Some(digit) = c.to_digit(base as u32) {
+            result = result * (base as c_long) + digit as c_long;
+        } else {
+            break;
+        }
+    }
+
+    result * (sign as c_long)
 }
 
 /// Convert a string to a quadword (long long) integer.
@@ -197,7 +247,7 @@ pub extern "C" fn l64a(n: c_long) -> *const c_uchar {
     let mut result: [c_uchar; 6] = [0; 6];
 
     // The standard for l64a says that it only uses 32 bits.
-    n &= 0xffffffff;
+    n &= 0xffff_ffff;
     if n == 0 {
         return conv_table_l64a[0] as *const c_uchar;
     }
@@ -216,7 +266,7 @@ pub extern "C" fn l64a(n: c_long) -> *const c_uchar {
 #[no_mangle]
 pub extern "C" fn a64l(s: *const c_uchar) -> c_long {
     let ptr: *const c_uchar = s;
-    let mut result: c_ulong = 0;
+    let mut result: c_long = 0;
     let end: *const c_uchar = unsafe { ptr.add(6) }; // TODO: Figure out why this is 6
     let mut shift: c_int = 0;
 
@@ -234,7 +284,7 @@ pub extern "C" fn a64l(s: *const c_uchar) -> c_long {
         unsafe {
             ptr.add(1);
         }
-        result |= (value << shift) as c_ulonglong;
+        result |= c_longlong::from(value << shift);
         shift += 6;
 
         if ptr >= end {
@@ -272,7 +322,7 @@ pub extern "C" fn setstate(statebuf: *mut c_char) -> *mut c_char {
     unimplemented!()
 }
 
-/// Reentrant versions of the `random' family of functions. These functions all use the following
+/// Reentrant versions of the ``random'' family of functions. These functions all use the following
 /// data structure to contain state, rather than global state variables.
 #[no_mangle]
 #[repr(C)]
@@ -501,18 +551,9 @@ pub extern "C" fn rust_ffi_test() -> c_int {
 /// Use the types required for CBindgen
 #[no_mangle]
 pub extern "C" fn _use_div_types() {
-    let d = div_t {
-        quot: 0,
-        rem: 0,
-    };
-    let ld = ldiv_t {
-        quot: 0,
-        rem: 0,
-    };
-    let lld = lldiv_t {
-        quot: 0,
-        rem: 0,
-    };
+    let d = div_t { quot: 0, rem: 0 };
+    let ld = ldiv_t { quot: 0, rem: 0 };
+    let lld = lldiv_t { quot: 0, rem: 0 };
 
     d.borrow();
     ld.borrow();

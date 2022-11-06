@@ -1,3 +1,8 @@
+#![no_std]
+
+#[path = "../lang.rs"]
+mod lang;
+
 fn main() {
-    eprintln!("Do not call this directly.");
+    panic!("crash and burn");
 }

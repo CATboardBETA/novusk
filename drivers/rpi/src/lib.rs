@@ -1,13 +1,18 @@
 #![no_std]
 
+pub(crate) extern crate bcm_soc;
 extern crate nmallocator;
 #[macro_use] extern crate novuskinc;
 #[macro_use] extern crate tock_registers;
 
-pub mod board;
-pub use board::RaspberryPi;
+use novuskinc::drivers::manager::DeviceDriverManager;
+
 pub mod common;
 pub use common::*;
+
+extern "C" {
+    pub(crate) static mut DEVICE_DRIVERS: DeviceDriverManager;
+}
 
 #[macro_use]
 #[path = "../../../kernel/irq.rs"]
@@ -21,9 +26,6 @@ pub mod rpi3;
 
 #[cfg(feature = "rpi2")]
 pub use rpi2::Rpi2;
-
-#[cfg(feature = "rpi3")]
-pub use rpi3::Rpi3;
 
 #[cfg(feature = "rpi2")]
 pub use rpi2::registers::*;

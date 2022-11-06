@@ -29,15 +29,16 @@ members = [
     # Drivers
     "drivers/boot/multiboot/",
     "drivers/cpu/",
+    "drivers/cpu/bcm_soc/",
     "drivers/device/",
-    "drivers/platform/arm/stellarisd/",
+    "drivers/platform/arm/hio/",
+    "drivers/platform/stellarisd/",
     # "drivers/platform/arm/stmd/",
     "drivers/platform/esp/",
     "drivers/platform/mailbox/",
     "drivers/platform/sifive/",
+    "drivers/fb/armfb/",
     "drivers/fom_os/",
-    "drivers/gpu/",
-    "drivers/gpu/armfb/",
     "drivers/gpu/vgag/",
     "drivers/input/keyboard/",
     "drivers/input/keyboard/pc_keyboard/",
@@ -62,7 +63,6 @@ members = [
 
     # Kernel
     "init/",
-    "kernel/console/",
     "kernel/irq/",
     "kernel/kinfo/",
     "kernel/konfig/",
@@ -70,6 +70,7 @@ members = [
     "kernel/notify/",
     "kernel/power/",
     "kernel/printk/",
+    "kernel/printk/console/",
     "kernel/setup/",
     "kernel/sys/",
     "kernel/time/",
@@ -93,14 +94,16 @@ members = [
     # Tools
     "tools/bootloader_image/",
 
+<<<<<<< HEAD
     # Shell
     "shell/",
+=======
+    "tests/",
+>>>>>>> de1ec45fe39922711cac6329e82f03106f307fa4
 ]
 
 
 [dependencies]
-fb = { path = "drivers/fb/" }
-gpu = { path = "drivers/gpu/" }
 kinfo = { path = "kernel/kinfo/" }
 libcolor = { path = "lib/libcolor/" }
 memory = { path = "mm/memory/" }
@@ -123,7 +126,7 @@ x86_64-sound = { path = "sound/x86_64-sound" }
 
 [target.'cfg(target_arch = "aarch64")'.dependencies]
 aarch64 = { path = "arch/aarch64/" }
-armfb = { path = "drivers/gpu/armfb/" }
+armfb = { path = "drivers/fb/armfb/" }
 libbmu = { path = "lib/libbmu/" }
 libwin = { path = "lib/libwin/" }
 libost = { path = "lib/libost/" }
@@ -131,7 +134,7 @@ libost = { path = "lib/libost/" }
 
 [target.'cfg(target_arch = "arm")'.dependencies]
 arm = { path = "arch/arm/" }
-armfb = { path = "drivers/gpu/armfb/" }
+armfb = { path = "drivers/fb/armfb/" }
 libbmu = { path = "lib/libbmu/" }
 
 [target.'cfg(target_arch = "riscv32")'.dependencies]
