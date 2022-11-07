@@ -1,5 +1,6 @@
 #![no_std]
 #![feature(lang_items)]
+#![feature(alloc_error_handler)]
 
 pub use stdint_intn::*;
 pub use stdint_uintn::*;

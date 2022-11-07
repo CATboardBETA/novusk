@@ -5,6 +5,16 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lib]
+crate-type = ["staticlib"]
+path = "src/lib.rs"
+
+[[bin]]
+name = "shell"
+path = "src/lib.rs"
+
 [dependencies]
-novuskinc = { git = "https://github.com/new-kernel/novuskinc/", features = ["v3"] }
-wee_alloc = "0.4.5"
+
+[dependencies.novuskinc]
+git = "https://github.com/new-kernel/novuskinc/"
+features = ["v4"]

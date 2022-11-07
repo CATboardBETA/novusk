@@ -1,5 +1,7 @@
 #![no_std]
 #![feature(lang_items)]
+#![feature(alloc_error_handler)]
+#![allow(non_camel_case_types)]
 
 #[cfg(not(feature = "no_lang_items"))]
 #[path = "../../../lang.rs"]

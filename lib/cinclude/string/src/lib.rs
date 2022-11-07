@@ -1,5 +1,6 @@
 #![no_std]
 #![feature(lang_items)]
+#![feature(alloc_error_handler)]
 
 use libc::{c_int, c_void, size_t};
 

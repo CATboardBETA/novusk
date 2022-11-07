@@ -1,7 +1,9 @@
 #![no_std]
 #![feature(lang_items)]
+#![feature(alloc_error_handler)]
 #![allow(non_camel_case_types)]
 #![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
 #![allow(unused)]
 #![warn(clippy::pedantic)]
 #![warn(clippy::nursery)]
@@ -18,7 +20,7 @@ use core::ffi::CStr;
 use core::ptr;
 use libc::{
     c_char, c_double, c_float, c_int, c_long, c_longlong, c_uchar, c_uint, c_ulong, c_ulonglong,
-    c_void, size_t, CS5,
+    c_void, size_t,
 };
 
 #[cfg(not(feature = "no_lang_items"))]

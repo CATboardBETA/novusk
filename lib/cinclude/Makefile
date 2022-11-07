@@ -1,11 +1,11 @@
 HOST =?
 TARGET =?
 
-ifeq ($(HOST),?)
+ifeq ($(HOST), ?)
 $(error HOST is not set)
-else ifeq ($(TARGET),?)
+else ifeq ($(TARGET), ?)
 $(error TARGET is not set)
-else ifeq ($(HOST),$(TARGET))
+else ifeq ($(HOST), $(TARGET))
 BUILD_ARGS = --release --target $(HOST)
 else
 BUILD_ARGS = --release --target ../../targets/$(TARGET).json
