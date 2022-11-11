@@ -17,9 +17,15 @@ int main() {
     if (labs(-5) != 5) return 6;
     if (llabs(-5) != 5) return 7;
 
+    // Test ato* functions
     if (atoi("5") != 5) return 8;
     if (atol("5") != 5) return 9;
     if (atoll("5") != 5) return 10;
+
+    // Test stro* functions
+    char *endptr;
+    if (strtol("5", &endptr, 10) != 5) return 11;
+
 
     return 0;
 }

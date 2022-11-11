@@ -7,8 +7,16 @@
 #![allow(unused)]
 #![warn(clippy::pedantic)]
 #![warn(clippy::nursery)]
-#![warn(clippy::cargo)]
+#![allow(clippy::doc_markdown)]
+#![allow(clippy::cast_lossless)]
+#![allow(clippy::cast_sign_loss)]
 #![allow(clippy::missing_const_for_fn)]
+#![allow(clippy::missing_errors_doc)]
+#![allow(clippy::missing_panics_doc)]
+#![allow(clippy::missing_safety_doc)]
+#![allow(clippy::suboptimal_flops)]
+#![allow(clippy::negative_feature_names)]
+
 
 extern crate alloc;
 
@@ -27,27 +35,18 @@ use libc::{
 #[path = "../../lang.rs"]
 pub(crate) mod lang;
 
-/// cbindgen:derive-eq
-/// cbindgen:derive-neq
-#[no_mangle]
 #[repr(C)]
 pub struct div_t {
     quot: c_int,
     rem: c_int,
 }
 
-/// cbindgen:derive-eq
-/// cbindgen:derive-neq
-#[no_mangle]
 #[repr(C)]
 pub struct ldiv_t {
     quot: c_long,
     rem: c_long,
 }
 
-/// cbindgen:derive-eq
-/// cbindgen:derive-neq
-#[no_mangle]
 #[repr(C)]
 pub struct lldiv_t {
     quot: c_longlong,
@@ -65,7 +64,7 @@ pub const MB_CUR_MAX: c_int = 3;
 /// Convert a string to a floating-point number.
 #[no_mangle]
 pub extern "C" fn atof(s: *const c_char) -> c_double {
-    unimplemented!()
+    unimplemented !()
 }
 
 /// Convert a string to an integer.
@@ -83,19 +82,43 @@ pub unsafe extern "C" fn atol(s: *const c_char) -> c_long {
 /// Convert a string to a long long integer.
 #[no_mangle]
 pub unsafe extern "C" fn atoll(s: *const c_char) -> c_longlong {
-    unsafe { CStr::from_ptr(s).to_str().unwrap().parse().unwrap() }
+    unsafe { CStr::from_ptr(s).to_str().unwrap_or("0").parse().unwrap() }
 }
 
 /// Convert a string to a floating-point number.
 #[no_mangle]
-pub extern "C" fn strtod(n_ptr: *const c_char, end_pointer: *const *const c_char) -> c_double {
-    unimplemented!()
+pub unsafe extern "C" fn strtod(n_ptr: *mut c_char, end_pointer: *mut *mut c_char) -> c_double {
+    let use_end_pointer = !end_pointer.is_null();
+
+    unsafe {
+        let str = CStr::from_ptr(n_ptr).to_str().unwrap();
+        let mut end = 0_usize;
+        let mut result = 0.0_f64;
+        for (i, c) in str.chars().enumerate() {
+            if c.is_numeric() {
+                result = result * 10.0_f64 + c.to_digit(10).unwrap() as f64;
+            } else {
+                end = i;
+                break;
+            }
+        }
+        if use_end_pointer {
+            *end_pointer = n_ptr.add(end);
+        }
+        result
+    }
 }
 
 /// Convert a string to a float.
 #[no_mangle]
-pub extern "C" fn strtof(s: *const c_char, endp: *mut *mut c_char) -> c_float {
-    unimplemented!()
+pub unsafe extern "C" fn strtof(s: *const c_char, endp: *mut *mut c_char) -> c_float {
+    unsafe { CStr::from_ptr(s).to_str().unwrap_or_else(|_| {
+        *endp = s as *mut c_char;
+        "0"
+    }).parse().unwrap_or_else(|_| {
+        *endp = s as *mut c_char;
+        0.0
+    })}
 }
 
 /// Convert a string to a long double.
@@ -109,34 +132,34 @@ pub extern "C" fn strtold(s: *const c_char, endp: *mut *mut c_char)
 /// Convert a string to a long integer.
 #[no_mangle]
 #[allow(clippy::missing_panics_doc)]
-pub extern "C" fn strtol(s: *const c_char, endp: *mut *mut c_char, base: c_int) -> c_long {
+pub unsafe  extern "C" fn strtol(s: *const c_char, endp: *mut *mut c_char, base: c_int) -> c_long {
     let s = unsafe { CStr::from_ptr(s).to_str().unwrap().to_owned() };
     let base = if base == 0 { 10 } else { base };
     let mut chars = s.chars().peekable();
     let mut result: c_long = 0;
     let mut sign: i8 = 1;
 
-    if let Some(' ') = chars.peek() {
+    if chars.peek() == Some(&' ') {
         chars.next();
     }
 
-    if let Some('\t') = chars.peek() {
+    if chars.peek() == Some(&'\t') {
         chars.next();
     }
 
-    if let Some('\n') = chars.peek() {
+    if chars.peek() == Some(&'\n') {
         chars.next();
     }
 
-    if let Some('\r') = chars.peek() {
+    if chars.peek() == Some(&'\r') {
         chars.next();
     }
 
-    if let Some('+') = chars.peek() {
+    if chars.peek() == Some(&'+') {
         chars.next();
     }
 
-    if let Some('-') = chars.peek() {
+    if chars.peek() == Some(&'-') {
         sign = -1;
         chars.next();
     }
@@ -490,31 +513,19 @@ pub extern "C" fn canonicalize_file_name(name: *const c_char) -> *mut c_char {
 /// Return the absolute value of int x.
 #[no_mangle]
 pub extern "C" fn abs(x: c_int) -> c_int {
-    if x < 0 {
-        -x
-    } else {
-        x
-    }
+    x.abs()
 }
 
 /// Return the absolute value of long int x.
 #[no_mangle]
 pub extern "C" fn labs(x: c_long) -> c_long {
-    if x < 0 {
-        -x
-    } else {
-        x
-    }
+    x.abs()
 }
 
 /// Return the absolute value of long long int x.
 #[no_mangle]
 pub extern "C" fn llabs(x: c_longlong) -> c_longlong {
-    if x < 0 {
-        -x
-    } else {
-        x
-    }
+    x.abs()
 }
 
 /// Return the [`div_t`] representation of integer division of numer/denom.

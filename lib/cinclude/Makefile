@@ -41,6 +41,15 @@ mv_files:
 test_libc:
 	$(MAKE) -C test/
 
+clippy:
+	cd bits/stdint_uintn && cargo clippy --target $(HOST)
+	cd bits/stdint_intn  && cargo clippy --target $(HOST)
+	cd stdint            && cargo clippy --target $(HOST)
+	cd stddef            && cargo clippy --target $(HOST)
+	cd stdlib            && cargo clippy --target $(HOST)
+	cd string            && cargo clippy --target $(HOST)
+	cd genheaders        && cargo clippy --target $(HOST)
+
 clean:
 	@ cargo clean
 	@ rm -rf inc/* lib/* test/build/*
